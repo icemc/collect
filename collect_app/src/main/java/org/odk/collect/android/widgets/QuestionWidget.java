@@ -46,13 +46,14 @@ import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.database.ActivityLogger;
 import org.odk.collect.android.exception.JavaRosaException;
-import org.odk.collect.android.injection.DependencyProvider;
+import org.odk.collect.android.utilities.DependencyProvider;
 import org.odk.collect.android.listeners.AudioPlayListener;
 import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.utilities.TextUtils;
 import org.odk.collect.android.utilities.ViewIds;
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.widgets.interfaces.BaseImageWidget;
+import org.odk.collect.android.widgets.interfaces.ButtonWidget;
 import org.odk.collect.android.widgets.interfaces.Widget;
 
 import java.util.ArrayList;
@@ -151,7 +152,7 @@ public abstract class QuestionWidget
             questionText.setVisibility(GONE);
         }
 
-        String imageURI = prompt.getImageText();
+        String imageURI = this instanceof SelectImageMapWidget ? null : prompt.getImageText();
         String audioURI = prompt.getAudioText();
         String videoURI = prompt.getSpecialFormQuestionText("video");
 
@@ -397,8 +398,9 @@ public abstract class QuestionWidget
         }
     }
 
-    protected Button getSimpleButton(String text, @IdRes int withId) {
-        Button button = new Button(getContext());
+    protected Button getSimpleButton(String text, @IdRes final int withId) {
+        final QuestionWidget questionWidget = this;
+        final Button button = new Button(getContext());
 
         button.setId(withId);
         button.setText(text);
@@ -409,6 +411,15 @@ public abstract class QuestionWidget
         params.setMargins(7, 5, 7, 5);
 
         button.setLayoutParams(params);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Collect.allowClick()) {
+                    ((ButtonWidget) questionWidget).onButtonClick(withId);
+                }
+            }
+        });
         return button;
     }
 
@@ -440,7 +451,7 @@ public abstract class QuestionWidget
 
     protected ImageView getAnswerImageView(Bitmap bitmap) {
         final QuestionWidget questionWidget = this;
-        ImageView imageView = new ImageView(getContext());
+        final ImageView imageView = new ImageView(getContext());
         imageView.setId(ViewIds.generateViewId());
         imageView.setPadding(10, 10, 10, 10);
         imageView.setAdjustViewBounds(true);
@@ -448,7 +459,7 @@ public abstract class QuestionWidget
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (questionWidget instanceof BaseImageWidget) {
+                if (questionWidget instanceof BaseImageWidget && Collect.allowClick()) {
                     ((BaseImageWidget) questionWidget).onImageClick();
                 }
             }

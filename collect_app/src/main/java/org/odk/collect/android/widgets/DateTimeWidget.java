@@ -136,7 +136,6 @@ public class DateTimeWidget extends QuestionWidget implements BinaryWidget {
     @Override
     public void setBinaryData(Object answer) {
         dateWidget.setBinaryData(answer);
-        cancelWaitingForData();
     }
 
     public AbstractDateWidget getDateWidget() {
@@ -151,5 +150,9 @@ public class DateTimeWidget extends QuestionWidget implements BinaryWidget {
     // Exposed for testing purposes to avoid reflection.
     public void setTimeWidget(TimeWidget timeWidget) {
         this.timeWidget = timeWidget;
+    }
+
+    @Override
+    public void onButtonClick(int buttonId) {
     }
 }
